@@ -84,9 +84,9 @@ class PersonServiceTest extends PostgresIntegrationSetup {
 	@Sql({ "/sql/person-init.sql" })
 	void deletePerson() {
 		long idToDelete = 10L;
-		Optional<Person> personExisting = personRepository.findById(idToDelete);
+		Optional<Person> personExisting = personService.getPersonById(idToDelete);
 		personService.deletePersonById(idToDelete);
-		Optional<Person> personNotExisting = personRepository.findById(idToDelete);
+		Optional<Person> personNotExisting = personService.getPersonById(idToDelete);
 		Assertions.assertFalse(personExisting.isEmpty());
 		Assertions.assertTrue(personNotExisting.isEmpty());
 		Mockito.verify(personRepository).deleteById(idToDelete);
@@ -96,27 +96,32 @@ class PersonServiceTest extends PostgresIntegrationSetup {
 	@MethodSource("personProvider")
 	@DisplayName("Creating Multiple persons")
 	@Sql({ "/sql/person-init.sql" })
-	void createPersonOkTest(PersonDto personDto, long id) {
+	void createPersonOkTest(PersonDto personDto, long id, boolean deleteAll) {
 
+		if (deleteAll) {
+			personRepository.deleteAll();
+		}
 		Person person = personService.createPerson(personDto);
 		Assertions.assertEquals(id, person.getId());
 		Assertions.assertEquals(personDto.getAge(), person.getAge());
 		Assertions.assertEquals(personDto.getPhone(), person.getPhone());
 		Assertions.assertEquals(personDto.getEmail(), person.getEmail());
 		Assertions.assertEquals(personDto.getName(), person.getName());
+		Assertions.assertNotNull(person.getTimestamp());
+		Assertions.assertEquals("INSERT-UPDATE", person.getOperation());
 
 	}
 
 	private static Stream<Arguments> personProvider() {
 		return Stream.of(
 				Arguments.of(PersonDto.builder().age(32).email("test@email1.com").name("testName1").phone("testPhone1")
-						.build(), 11L),
+						.build(), 11L, false),
 				Arguments.of(PersonDto.builder().age(22).email("test@email2.com").name("testName2").phone("testPhone2")
-						.build(), 11L),
+						.build(), 11L, false),
 				Arguments.of(PersonDto.builder().age(76).email("test@email.3com").name("testName3").phone("testPhone3")
-						.build(), 11L),
+						.build(), 11L, false),
 				Arguments.of(PersonDto.builder().age(12).email("test@email4.com").name("testName4").phone("testPhone4")
-						.build(), 11L));
+						.build(), 1L, true));
 	}
 
 }
