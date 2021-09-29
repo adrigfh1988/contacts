@@ -1,0 +1,21 @@
+= Contacts API
+
+== Overview
+
+This is a small sample project just showcasing some different technologies
+
+just AS
+
+* https://spring.io/projects/spring-boot[Spring boot 2.5.4]
+* https://jdk.java.net/17/[Java 17]
+* https://spring.io/projects/spring-hateoas[Spring Hateoas]
+* https://www.testcontainers.org/[Testcontainers]
+* https://www.postgresql.org/[PostgreSQL]
+* https://spring.io/projects/spring-restdocs[Spring Rest Docs]
+* https://spring.io/guides/gs/rest-hateoas/[Hypermedia]
+
+
+image::https://img.shields.io/badge/Java-v17-green.svg[GitHub mascot,100]
+image::https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white[Spring,100]
+image::https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white[postgres,200]
+image::http://ForTheBadge.com/images/badges/built-with-love.svg[love,450]
