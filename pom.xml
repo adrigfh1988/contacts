@@ -23,7 +23,9 @@
 		<sonar.host.url>http://localhost:9000</sonar.host.url>
 		<sonar.scm.provide>git</sonar.scm.provide>
 		<sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.test.result.directory}/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<!--suppress UnresolvedMavenProperty -->
+		<sonar.coverage.jacoco.xmlReportPaths>target/jacoco/jacoco.xml
+		</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 
@@ -80,7 +82,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<artifactId>spring-restdocs-webtestclient</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -100,6 +102,7 @@
 			<artifactId>random-beans</artifactId>
 			<version>3.9.0</version>
 		</dependency>
+
 
 	</dependencies>
 	<dependencyManagement>
@@ -124,7 +127,6 @@
 			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.8</version>
 				<executions>
 					<execution>
 						<id>generate-docs</id>
@@ -133,18 +135,14 @@
 							<goal>process-asciidoc</goal>
 						</goals>
 						<configuration>
+							<sourceDocumentName>index.adoc</sourceDocumentName>
 							<backend>html</backend>
-							<doctype>book</doctype>
+							<attributes>
+								<snippets>${project.build.directory}/snippets</snippets>
+							</attributes>
 						</configuration>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.springframework.restdocs</groupId>
-						<artifactId>spring-restdocs-asciidoctor</artifactId>
-						<version>${spring-restdocs.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -159,6 +157,31 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								src/main/asciidoc/static/docs
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>
+										${project.build.directory}/generated-docs
+									</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.7</version>
@@ -171,7 +194,7 @@
 						<configuration>
 							<propertyName>jacocoArgLine</propertyName>
 							<destFile>
-								${project.test.result.directory}/jacoco/jacoco.exec
+								target/jacoco/jacoco.exec
 							</destFile>
 						</configuration>
 					</execution>
@@ -183,9 +206,9 @@
 						</goals>
 						<configuration>
 							<dataFile>
-								${project.test.result.directory}/jacoco/jacoco.exec
+								target/jacoco/jacoco.exec
 							</dataFile>
-							<outputDirectory>${project.test.result.directory}/jacoco
+							<outputDirectory>target/jacoco
 							</outputDirectory>
 						</configuration>
 					</execution>

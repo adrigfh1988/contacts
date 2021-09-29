@@ -1,0 +1,8 @@
+[source,bash]
+----
+$ echo '{"name":"test User Name","age":65,"email":"test@test.com","phone":"+34.626120821","links":[]}' | http POST 'http://localhost:8080/create' \
+    'Content-Type:application/json' \
+    'X-Forwarded-Host:example-doc.com' \
+    'X-Forwarded-Proto:https' \
+    'X-Forwarded-Port:443'
+----

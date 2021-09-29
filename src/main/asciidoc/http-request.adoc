@@ -1,0 +1,12 @@
+[source,http]
+----
+POST /create HTTP/1.1
+Content-Type: application/json
+X-Forwarded-Host: example-doc.com
+X-Forwarded-Proto: https
+X-Forwarded-Port: 443
+Content-Length: 93
+Host: localhost:8080
+
+{"name":"test User Name","age":65,"email":"test@test.com","phone":"+34.626120821","links":[]}
+----

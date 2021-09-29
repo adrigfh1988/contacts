@@ -1,7 +1,6 @@
 package com.example.contactspost.entity;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import com.example.contactspost.components.NumericalStringRandomizer;
 import io.github.benas.randombeans.annotation.Randomizer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +28,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class Person {
 
 	@Id
@@ -65,20 +66,6 @@ public class Person {
 	private void audit(String operation) {
 		setOperation(operation);
 		setTimestamp(LocalDate.now());
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Person person))
-			return false;
-		return Objects.equals(id, person.id);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
 	}
 
 }

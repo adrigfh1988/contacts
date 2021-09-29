@@ -1,0 +1,18 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 201 Created
+Location: /1
+Content-Type: application/json
+Content-Length: 173
+
+{
+  "name" : "test User Name",
+  "age" : 65,
+  "email" : "test@test.com",
+  "phone" : "+34.626120821",
+  "links" : [ {
+    "rel" : "self",
+    "href" : "/1"
+  } ]
+}
+----

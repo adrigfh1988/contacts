@@ -1,0 +1,9 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/create' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'X-Forwarded-Host: example-doc.com' \
+    -H 'X-Forwarded-Proto: https' \
+    -H 'X-Forwarded-Port: 443' \
+    -d '{"name":"test User Name","age":65,"email":"test@test.com","phone":"+34.626120821","links":[]}'
+----
