@@ -4,7 +4,6 @@ import com.example.contactspost.controller.ContactsController;
 import com.example.contactspost.entity.Person;
 import com.example.contactspost.models.PersonDto;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,7 @@ public class AlbumModelAssembler extends RepresentationModelAssemblerSupport<Per
 	@Override
 	public CollectionModel<PersonDto> toCollectionModel(Iterable<? extends Person> entities) {
 		CollectionModel<PersonDto> actorModels = super.toCollectionModel(entities);
-		actorModels.add(linkTo(methodOn(ContactsController.class).getAllPersons(Pageable.unpaged())).withSelfRel());
+		actorModels.add(linkTo(methodOn(ContactsController.class).getAllPersons(1, 10)).withSelfRel());
 		return actorModels;
 	}
 
