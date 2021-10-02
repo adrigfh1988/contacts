@@ -6,7 +6,7 @@ import com.example.contactspost.models.PersonDto;
 import com.example.contactspost.service.PersonService;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.PagedModel;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -52,9 +53,10 @@ public class ContactsController {
 	}
 
 	@GetMapping
-	public ResponseEntity<PagedModel<PersonDto>> getAllPersons(Pageable pageable) {
+	public ResponseEntity<PagedModel<PersonDto>> getAllPersons(@RequestParam("page") int pageIndex,
+			@RequestParam("size") int pageSize) {
 
-		Page<Person> personPage = this.personService.findAll(pageable);
+		Page<Person> personPage = this.personService.findAll(PageRequest.of(pageIndex, pageSize));
 		PagedModel<PersonDto> personDtos = pagedResourcesAssembler.toModel(personPage, albumModelAssembler);
 		return ResponseEntity.ok(personDtos);
 	}
