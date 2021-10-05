@@ -2,24 +2,268 @@
 
 == Overview
 
-This is a small sample project just showcasing some different technologies
+This is a small sample project just showcasing some different technologies.
 
-just AS
+Basically a *Spring Boot with a Hypermedia API*.
+Using Hateoas, Using several kinds of testing, *JUnit, TestContainers y WebFlux Tests*(using these to document the API using *Spring Rest docs*)
 
-* https://spring.io/projects/spring-boot[Spring boot 2.5.4]
-* https://jdk.java.net/17/[Java 17]
-* https://spring.io/projects/spring-hateoas[Spring Hateoas]
-* https://www.testcontainers.org/[Testcontainers]
-* https://www.postgresql.org/[PostgreSQL]
-* https://spring.io/projects/spring-restdocs[Spring Rest Docs]
-* https://spring.io/guides/gs/rest-hateoas/[Hypermedia]
+== Framework
+
+This is Built on top of Spring boot 2.5.4 and Java 17
+
+== Database
+
+For persistence a PostgreSQL using Spring Data JPA.
+
+== REST
+
+Hypermedia using Hateoas
+
+For example, when creating a contact
+
+[source,http]
+----
+REQUEST:
+
+POST http://localhost:8080/contacts/create
+Content-Type: application/json
+X-Forwarded-Host: example-doc.com
+X-Forwarded-Proto: https
+X-Forwarded-Port: 443
+x-forwarded-prefix: /api
+
+{
+  "name": "Adrian",
+  "age": 33,
+  "email": "adrianfloresh@gmail.com",
+  "phone": "626120739"
+}
+
+RESPONSE:
+
+POST http://localhost:8080/contacts/create
+
+HTTP/1.1 201
+Location: https://example-doc.com/api/20
+Content-Type: application/hal+json
+Transfer-Encoding: chunked
+Date: Tue, 05 Oct 2021 21:21:39 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+{
+  "name": "Adrian",
+  "age": 33,
+  "email": "adrianfloresh@gmail.com",
+  "phone": "+34-776120711",
+  "_links": {
+    "self": {
+      "href": "https://example-doc.com/api/20"
+    }
+  }
+}
+----
+
+Getting that same contact
+
+----
+REQUEST:
+GET http://localhost:8080/contacts/20
+
+RESPONSE:
+GET http://localhost:8080/contacts/20
+
+HTTP/1.1 200
+Content-Type: application/hal+json
+Transfer-Encoding: chunked
+Date: Tue, 05 Oct 2021 21:23:09 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+{
+  "name": "Adrian",
+  "age": 33,
+  "email": "adrianfloresh@gmail.com",
+  "phone": "+34-776120711",
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/contacts/20"
+    }
+  }
+}
+----
+
+Getting all contacts
+
+----
+REQUEST:
+GET http://localhost:8080/contacts?page=1&size=3
+
+RESPONSE:
+GET http://localhost:8080/contacts?page=1&size=3
+
+HTTP/1.1 200
+Content-Type: application/hal+json
+Transfer-Encoding: chunked
+Date: Tue, 05 Oct 2021 21:26:51 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+{
+  "_embedded": {
+    "personDtoList": [
+      {
+        "name": "Ana",
+        "age": 33,
+        "email": "adrianfloresh@gmail.com",
+        "phone": "626120739",
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/contacts/6"
+          }
+        }
+      },
+      {
+        "name": "Maria",
+        "age": 33,
+        "email": "adrianfloresh@gmail.com",
+        "phone": "626120739",
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/contacts/7"
+          }
+        }
+      },
+      {
+        "name": "Miguel",
+        "age": 33,
+        "email": "adrianfloresh@gmail.com",
+        "phone": "626120739",
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/contacts/12"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "first": {
+      "href": "http://localhost:8080/contacts/?page=0&size=3"
+    },
+    "prev": {
+      "href": "http://localhost:8080/contacts/?page=0&size=3"
+    },
+    "self": {
+      "href": "http://localhost:8080/contacts/?page=1&size=3"
+    },
+    "next": {
+      "href": "http://localhost:8080/contacts/?page=2&size=3"
+    },
+    "last": {
+      "href": "http://localhost:8080/contacts/?page=5&size=3"
+    }
+  },
+  "page": {
+    "size": 3,
+    "totalElements": 16,
+    "totalPages": 6,
+    "number": 1
+  }
+}
+----
+
+== Testing
+
+Several kind of testing, For example
+
+----
+PersonServiceTest.java is to show TestContainers in Action using a real PostgreSQL Database
+----
+
+In order to setup the PostgreSQL database, I make the Tests extends from
+
+[source,java]
+----
+public class PostgresIntegrationSetup {
+
+	// will be started before and stopped after each test method
+	@Container
+	protected static PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer("postgres")
+			.withDatabaseName("postgres").withUsername("postgres").withPassword("example");
+
+	@DynamicPropertySource
+	public static void overrideProps(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", postgresqlContainer::getUsername);
+		registry.add("spring.datasource.password", postgresqlContainer::getPassword);
+	}
+
+	@BeforeAll
+	static void setup() {
+		postgresqlContainer.start();
+	}
+
+	@AfterAll
+	static void tearDown() {
+		postgresqlContainer.stop();
+	}
+
+}
+----
+
+This basically will override Spring properties to put the containers URL user and pass, also will start it.
+
+By Doing this, we can
+
+[source,java]
+----
+@SpringBootTest
+class PersonServiceTest extends PostgresIntegrationSetup {
+
+	@Autowired
+	private PersonService personService;
+
+	@SpyBean
+	private PersonRepository personRepository;
+
+	@Test
+	@DisplayName("This test is for finding all elements in an unPaged manner")
+	@Sql({ "/sql/person-init.sql" })
+	void findAllPersonsUnPaged() {
+		Pageable pageable = Pageable.unpaged();
+		Page<Person> personServiceAll = personService.findAll(pageable);
+		Assertions.assertEquals(10, personServiceAll.getTotalElements());
+		Mockito.verify(personRepository).findAll(pageable);
+	}
+}
+----
+
+== Code Formatting
+
+All Code is formatted and validated using *spring-javaformat*
+
+----
+mvn spring-javaformat:apply
+----
+
+== Static analysis
+
+For Static analysis, is using a local Sonarqube
+
+For cleaning, format code, testing and uploading to sonar
+
+----
+mvn clean spring-javaformat:apply verify sonar:sonar
+----
+
+sonar muy be on the local machine, in my case running on a docker container
 
 
-image::https://img.shields.io/badge/Java-v17-green.svg[GitHub mascot,100]
-image::https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white[Spring,100]
-image::https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white[postgres,200]
-image::http://ForTheBadge.com/images/badges/built-with-love.svg[love,250]
 
 
-include::src/main/asciidoc/http-request.adoc[]
-include::src/main/asciidoc/http-response.adoc[]
+
+
+
+
+
