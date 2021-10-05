@@ -66,6 +66,7 @@ Connection: keep-alive
 
 Getting that same contact
 
+[source,http]
 ----
 REQUEST:
 GET http://localhost:8080/contacts/20
@@ -95,6 +96,7 @@ Connection: keep-alive
 
 Getting all contacts
 
+[source,http]
 ----
 REQUEST:
 GET http://localhost:8080/contacts?page=1&size=3
